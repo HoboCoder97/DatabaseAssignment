@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 ?>
 
@@ -40,13 +41,13 @@ session_start();
         </div>
         <div class="sidebar-wrapper" id="sidebar-wrapper">
             <ul class="nav">
-                <li >
-                    <a href="consultation.php">
+                <li class="active">
+                    <a href="presentation.php">
                         <i class="now-ui-icons users_single-02"></i>
-                        <p>Consultation</p>
+                        <p>Presentation</p>
                     </a>
                 </li>
-                <li class="active">
+                <li>
                     <a href="viewlecturer.php">
                         <i class="now-ui-icons design_app"></i>
                         <p>Timetable</p>
@@ -130,47 +131,52 @@ session_start();
         </div>
         <div class="content">
             <div class="row">
-
+                <div class="col-md-3">
+                    <div class="card card-user">
+                        <div class="card-body">
+                            <a href="viewpresentationslot.php">View Presentation Slots</a>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-9">
                     <div class="card card-user">
                         <div class="card-body">
 
-                            <?php
-                            echo "<table class=\"table\">
-                                        <thead>
-                                        <tr>
-                                            <th> Name </th>
-                                            <th> ID </th>
-                                            <th> ViewTimetable </th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>";
-                            include ("../includes/db.php");
+                           <h5>Create Presentation Slot</h5>
 
-                            $sql  = "SELECT * FROM lecturer";
-                            // $result = mysqli_real_query($con, $sql);
-                            $result = mysqli_query($con, $sql) or die ("Error in query: $sql ".mysqli_error($con));
-                            $count=0;
+                            <br>
+                            <form action="addslot.php" method="post">
+                            Student <select name="student">
+                                    <?php
+                                    include("../includes/db.php");
+                                    $sql = "SELECT * FROM student";
+                                    $res = mysqli_query($con, $sql);
+                                    while ($rows = mysqli_fetch_assoc($res)){
+                                        echo "<option value='{$rows['stud_name']}'> {$rows['stud_name']} </option>";
+                                    }
 
-                                while($row = mysqli_fetch_assoc($result)) {
-                                   echo "<tr><form action='timetable.php' method='post'>";
-                                   echo "<td>{$row['lec_name']}</td>";
-                                    echo "<td>{$row['lec_id']}</td>";
-                                    echo "<input type='hidden' value='{$row['lec_id']}' name='id'>";
-                                    echo "<input type='hidden' value='{$row['lec_name']}' name='name'>";
-                                    echo "<td><input type='submit' value='View Timetable'></td>";
-                                   echo "</form></tr>";
-                                }
-
-
-
-                            ?>
-                            </tbody>
-                            </table>
+                                    ?>
+                            </select>
+                                <br>
+                                <br>
+                                Lecturer <select name="lecturer">
+                                    <?php
+                                    include ("../includes/db.php");
+                                    $query = "SELECT * FROM lecturer";
+                                    $result = mysqli_query($con, $query);
+                                    while ($row = mysqli_fetch_assoc($result)){
+                                        echo "<option value='{$row['lec_name']}'> {$row['lec_name']} </option>";
+                                    }
+                                    ?>
+                                </select>
+                            <br><br>
+                                <input type="submit" value="Cross Reference">
+                            </form>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
         <footer class="footer">
             <div class="container-fluid">

@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 ?>
 
@@ -40,14 +41,14 @@ session_start();
         </div>
         <div class="sidebar-wrapper" id="sidebar-wrapper">
             <ul class="nav">
-                <li >
+                <li class="active">
                     <a href="consultation.php">
                         <i class="now-ui-icons users_single-02"></i>
                         <p>Consultation</p>
                     </a>
                 </li>
-                <li class="active">
-                    <a href="viewlecturer.php">
+                <li>
+                    <a href="viewtimetable.php">
                         <i class="now-ui-icons design_app"></i>
                         <p>Timetable</p>
                     </a>
@@ -130,37 +131,66 @@ session_start();
         </div>
         <div class="content">
             <div class="row">
-
+                <div class="col-md-3">
+                    <div class="card card-user">
+                        <div class="card-body">
+                            <a href="createconsultation.php">Create Consultation</a>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-9">
                     <div class="card card-user">
                         <div class="card-body">
 
                             <?php
+                            $id = $_SESSION['id'];
                             echo "<table class=\"table\">
                                         <thead>
                                         <tr>
-                                            <th> Name </th>
-                                            <th> ID </th>
-                                            <th> ViewTimetable </th>
+                                            <th> Venue </th>
+                                            <th> Time </th>
+                                            <th> Day </th>
+                                            <th> Status </th>
+                                            <th> Change </th>
                                         </tr>
                                         </thead>
                                         <tbody>";
                             include ("../includes/db.php");
 
-                            $sql  = "SELECT * FROM lecturer";
+                            $sql  = "SELECT * FROM `booking_schedule` where lec_id='$id' AND status!='completed'";
                             // $result = mysqli_real_query($con, $sql);
                             $result = mysqli_query($con, $sql) or die ("Error in query: $sql ".mysqli_error($con));
                             $count=0;
 
-                                while($row = mysqli_fetch_assoc($result)) {
-                                   echo "<tr><form action='timetable.php' method='post'>";
-                                   echo "<td>{$row['lec_name']}</td>";
-                                    echo "<td>{$row['lec_id']}</td>";
-                                    echo "<input type='hidden' value='{$row['lec_id']}' name='id'>";
-                                    echo "<input type='hidden' value='{$row['lec_name']}' name='name'>";
-                                    echo "<td><input type='submit' value='View Timetable'></td>";
-                                   echo "</form></tr>";
+                            while($row = mysqli_fetch_assoc($result)) {
+                                echo "<tr><form action='functions.php' method='post'>";
+                                echo "<td>{$row['venue']}</td>";
+                                echo "<td>{$row['time']}</td>";
+                                echo "<td>{$row['day']}</td>";
+                                echo "<td>{$row['status']}</td>";
+                                echo "<td>";
+                                if ($row['status'] == 'confirmed'){
+                                    echo "<input type='hidden' value='{$row['booking_id']}' name='id'>";
+                                    echo "<input type='hidden' value='{$row['status']}' name='status'>";
+                                    echo "<input type='submit' value='Completed Consultation'>";}
+                                else if ($row['status'] == 'pending'){
+
+                                    echo "<input type='hidden' value='{$row['booking_id']}' name='id'>";
+                                    echo "<input type='hidden' value='{$row['status']}' name='status'>";
+                                    echo "<input type='submit' value='Confirm Consultation'>";
                                 }
+                                else if ($row['status'] == 'open'){
+
+                                    echo "<input type='hidden' value='{$row['booking_id']}' name='id'>";
+                                    echo "<input type='hidden' value='{$row['status']}' name='status'>";
+                                    echo "<input type='submit' value='Remove Consultation'>";
+                                }
+
+
+                                echo "</td>";
+                                echo "</form></tr>";
+                            }
+
 
 
 
@@ -171,6 +201,7 @@ session_start();
                     </div>
                 </div>
             </div>
+
         </div>
         <footer class="footer">
             <div class="container-fluid">

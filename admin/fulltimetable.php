@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 ?>
 
 <!DOCTYPE html>
@@ -41,9 +41,9 @@ session_start();
         <div class="sidebar-wrapper" id="sidebar-wrapper">
             <ul class="nav">
                 <li >
-                    <a href="consultation.php">
+                    <a href="presentation.php">
                         <i class="now-ui-icons users_single-02"></i>
-                        <p>Consultation</p>
+                        <p>Presentation</p>
                     </a>
                 </li>
                 <li class="active">
@@ -130,37 +130,78 @@ session_start();
         </div>
         <div class="content">
             <div class="row">
+                <div class="col-md-3">
+                    <div class="card card-user">
+                        <div class="card card-body">
+                            <form action="timetable.php" method="post">
+                                <?php
+                                echo "<input type='hidden' value='{$_POST['id']}' name='id'>";
+                                echo "<input type='hidden' value='{$_POST['name']}' name='name'>";
 
+                               ?>
+                                <input type="submit" value="Back" >
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-9">
                     <div class="card card-user">
                         <div class="card-body">
 
                             <?php
+                            $name = $_POST['name'];
+                            $week = $_POST['week'];
+                            echo "<h5>$name   's Timetable for Week $week</h5>";
                             echo "<table class=\"table\">
                                         <thead>
                                         <tr>
-                                            <th> Name </th>
-                                            <th> ID </th>
-                                            <th> ViewTimetable </th>
+                                            <th> Day </th>
+                                            <th> 8:00am </th>
+                                            <th> 10:00am </th>
+                                            <th> 12:00pm </th>
+                                            <th> 2:00pm </th>
+                                            <th> 4:00pm </th>
                                         </tr>
                                         </thead>
                                         <tbody>";
                             include ("../includes/db.php");
-
-                            $sql  = "SELECT * FROM lecturer";
+                            $id = $_POST['id'];
+                            $sql  = "
+select lec_schedule.date, lec_schedule.day, lec_schedule.time, lec_schedule.venue, module.mod_name, l.lec_name from lec_schedule
+    inner join lecturer l on lec_schedule.lec_id = l.lec_id
+    inner join module on lec_schedule.mod_id = module.mod_id
+    where l.lec_id = $id";
                             // $result = mysqli_real_query($con, $sql);
                             $result = mysqli_query($con, $sql) or die ("Error in query: $sql ".mysqli_error($con));
                             $count=0;
+                            $days = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday");
+                            $row=mysqli_fetch_assoc($result);
+                            while($count<5) {
+                                echo "<tr><form action='timetable.php' method='post'>";
+                                echo "<td>{$days[$count]}</td>";
+                                for( $i=strtotime("8:00:00"); $i<strtotime("17:00:00"); $i+=7200) {
+                                    if ($row['day'] == $days[$count])
+                                    {
+                                        $time = strtotime($row['time']);
+                                        if ($time == $i){
+                                            echo "<td>{$row['venue']}</td>";
+                                        }
+                                        else {
+                                            echo "<td>EMPTY</td>";
+                                            echo "<form>";
 
-                                while($row = mysqli_fetch_assoc($result)) {
-                                   echo "<tr><form action='timetable.php' method='post'>";
-                                   echo "<td>{$row['lec_name']}</td>";
-                                    echo "<td>{$row['lec_id']}</td>";
-                                    echo "<input type='hidden' value='{$row['lec_id']}' name='id'>";
-                                    echo "<input type='hidden' value='{$row['lec_name']}' name='name'>";
-                                    echo "<td><input type='submit' value='View Timetable'></td>";
-                                   echo "</form></tr>";
+                                            echo "</form>";
+
+                                        }
+
+                                    }
+                                    else
+                                        echo "<td>EMPTY</td>";
                                 }
+
+                                echo "</form></tr>";
+                                $count++;
+                            }
 
 
 
@@ -171,6 +212,7 @@ session_start();
                     </div>
                 </div>
             </div>
+
         </div>
         <footer class="footer">
             <div class="container-fluid">

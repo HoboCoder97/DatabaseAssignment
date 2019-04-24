@@ -47,7 +47,7 @@ session_start();
                     </a>
                 </li>
                 <li class="active">
-                    <a href="viewlecturer.php">
+                    <a href="viewtimetable.php">
                         <i class="now-ui-icons design_app"></i>
                         <p>Timetable</p>
                     </a>
@@ -130,37 +130,90 @@ session_start();
         </div>
         <div class="content">
             <div class="row">
-
+                <div class="col-md-3">
+                    <div class="card card-user">
+                        <div class="card card-body">
+                            <a href="viewtimetable.php">Back</a>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-9">
                     <div class="card card-user">
                         <div class="card-body">
 
                             <?php
+                            $name = $_SESSION['name'];
+                            $week = $_POST['week'];
+                            echo "<h5>$name   's Timetable for Week $week</h5>";
                             echo "<table class=\"table\">
                                         <thead>
                                         <tr>
-                                            <th> Name </th>
-                                            <th> ID </th>
-                                            <th> ViewTimetable </th>
+                                            <th> Day </th>
+                                            <th> 8:00am </th>
+                                            <th> 10:00am </th>
+                                            <th> 12:00pm </th>
+                                            <th> 2:00pm </th>
+                                            <th> 4:00pm </th>
                                         </tr>
                                         </thead>
                                         <tbody>";
                             include ("../includes/db.php");
+                            $id = $_POST['id'];
+                            $count=0; $rcount=0;
+                            $days = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday");
+                            $times = array (strtotime("8:00:00"),strtotime("10:00:00"),strtotime("12:00:00"),strtotime("14:00:00"),
+                                strtotime("16:00:00"));
 
-                            $sql  = "SELECT * FROM lecturer";
-                            // $result = mysqli_real_query($con, $sql);
-                            $result = mysqli_query($con, $sql) or die ("Error in query: $sql ".mysqli_error($con));
-                            $count=0;
+                            for ($day=0; $day<5; $day++) {
+                                echo "<tr><td>{$days[$day]}</td>";
 
-                                while($row = mysqli_fetch_assoc($result)) {
-                                   echo "<tr><form action='timetable.php' method='post'>";
-                                   echo "<td>{$row['lec_name']}</td>";
-                                    echo "<td>{$row['lec_id']}</td>";
-                                    echo "<input type='hidden' value='{$row['lec_id']}' name='id'>";
-                                    echo "<input type='hidden' value='{$row['lec_name']}' name='name'>";
-                                    echo "<td><input type='submit' value='View Timetable'></td>";
-                                   echo "</form></tr>";
+
+                                for ($time = 0; $time < 5; $time++) {
+                                    $found = 0;
+                                    $sql = "select poop.booking_id, poop.week, poop.day, poop.time, poop.venue, poop.lec_name, poop.type_name, poop.stud_name, poop.status from (
+
+    select booking_id, w.week, day, time, venue, l.lec_name, (bt.type_name) as type_name, (s.stud_name) as stud_name, status from booking_schedule
+    inner join lecturer l on booking_schedule.lec_id = l.lec_id
+    inner join booking_type bt on booking_schedule.type_id = bt.type_id
+    inner join student s on booking_schedule.stud_id = s.stud_id
+    inner join week w on booking_schedule.week_id = w.week_id
+    union all
+    select null as booking_id, ('$week') as week, day, time, venue, l2.lec_name, (m.mod_name) as type_name, (null) as stud_name, (null) as status from lec_schedule
+    inner join lecturer l2 on lec_schedule.lec_id = l2.lec_id
+    inner join module m on lec_schedule.mod_id = m.mod_id
+
+
+                                             )
+as poop where lec_name = 'hema' and week = $week
+ORDER BY FIELD(day, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'), time";
+
+                                    // $result = mysqli_real_query($con, $sql);
+                                    $result = mysqli_query($con, $sql) or die ("Error in query: $sql " . mysqli_error($con));
+
+                                    while ($row = mysqli_fetch_assoc($result)) {
+                                        if ($row['day'] == $days[$day]) {
+
+                                            if (strtotime($row['time']) == $times[$time]) {
+                                                if ($row['status'] != "open") {
+                                                    echo "<td>{$row['venue']}</td>";
+                                                    $found = 1;
+                                                }
+                                                else {
+                                                    echo "<td>Open Consultation Slot</td>";
+                                                    $found=1;
+                                                }
+                                            }
+
+
+                                        }
+                                    }
+                                    if ($found==0)
+                                        echo "<td>EMPTY</td>";
                                 }
+
+
+                                echo "</tr>";
+                            }
 
 
 
@@ -171,6 +224,7 @@ session_start();
                     </div>
                 </div>
             </div>
+
         </div>
         <footer class="footer">
             <div class="container-fluid">

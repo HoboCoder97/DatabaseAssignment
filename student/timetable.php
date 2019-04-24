@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 ?>
 
 <!DOCTYPE html>
@@ -130,12 +130,30 @@
         </div>
         <div class="content">
             <div class="row">
+                <div class="col-md-3">
+                    <div class="card card-user">
+                        <div class="card card-body">
+                            <form action="fulltimetable.php" method="post">
 
+
+                               Week  <input type="number" name="week" value="1">
+                                <?php
+                                $id = $_POST['id'];
+                                echo "<input type='hidden' value='{$_POST['id']}' name='id'>";
+                                echo "<input type='hidden' value='{$_POST['name']}' name='name'>";
+                                ?>
+
+                                <input type="submit" value="View Full Timetable for Week" >
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-9">
                     <div class="card card-user">
                         <div class="card-body">
 
                             <?php
+                            include ("../includes/db.php");
                             $name = $_POST['name'];
                             echo "<h5>$name   's Timetable</h5>";
                             echo "<table class=\"table\">
@@ -150,38 +168,48 @@
                                         </tr>
                                         </thead>
                                         <tbody>";
-                            include ("../includes/db.php");
-                            $id = $_POST['id'];
-                            $sql  = "
-select lec_schedule.date, lec_schedule.day, lec_schedule.time, lec_schedule.venue, module.mod_name, l.lec_name from lec_schedule
-    inner join lecturer l on lec_schedule.lec_id = l.lec_id
-    inner join module on lec_schedule.mod_id = module.mod_id
-    where l.lec_id = $id";
-                            // $result = mysqli_real_query($con, $sql);
-                            $result = mysqli_query($con, $sql) or die ("Error in query: $sql ".mysqli_error($con));
-                            $count=0;
                             $days = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday");
-                            $row=mysqli_fetch_assoc($result);
-                            while($count<5) {
-                                echo "<tr><form action='timetable.php' method='post'>";
-                                echo "<td>{$days[$count]}</td>";
-                            for( $i=strtotime("8:00:00"); $i<strtotime("17:00:00"); $i+=7200) {
-                                if ($row['day'] == $days[$count])
-                                {
-                                    $time = strtotime($row['time']);
-                                    if ($time == $i){
-                                        echo "<td>{$row['venue']}</td>";
+                            $times = array (strtotime("8:00:00"),strtotime("10:00:00"),strtotime("12:00:00"),strtotime("14:00:00"),
+                                strtotime("16:00:00"));
+
+                            for ($day=0; $day<5; $day++) {
+                                echo "<tr><td>{$days[$day]}</td>";
+
+
+                                for ($time = 0; $time < 5; $time++) {
+                                    $found = 0;
+                                    $sql = "select day, time, venue, l2.lec_name, m.mod_name from lec_schedule
+    inner join lecturer l2 on lec_schedule.lec_id = l2.lec_id
+    inner join module m on lec_schedule.mod_id = m.mod_id
+where l2.lec_name = '$name'
+ORDER BY FIELD(day, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satuday', 'Sunday'), time";
+
+                                    // $result = mysqli_real_query($con, $sql);
+                                    $result = mysqli_query($con, $sql) or die ("Error in query: $sql " . mysqli_error($con));
+
+                                    while ($row = mysqli_fetch_assoc($result)) {
+                                        if ($row['day'] == $days[$day]) {
+
+                                            if (strtotime($row['time']) == $times[$time]) {
+                                                if ($row['status'] != "open") {
+                                                    echo "<td>{$row['venue']}</td>";
+                                                    $found = 1;
+                                                }
+                                                else {
+                                                    echo "<td>Open Consultation Slot</td>";
+                                                    $found=1;
+                                                }
+                                            }
+
+
+                                        }
                                     }
-                                    else
-                                        echo
-                                            "<td>EMPTY</td>";
-                                }
-                                else
-                                    echo "<td>EMPTY</td>";
+                                    if ($found==0)
+                                        echo "<td>EMPTY</td>";
                                 }
 
-                                echo "</form></tr>";
-                                $count++;
+
+                                echo "</tr>";
                             }
 
 
@@ -193,6 +221,7 @@ select lec_schedule.date, lec_schedule.day, lec_schedule.time, lec_schedule.venu
                     </div>
                 </div>
             </div>
+
         </div>
         <footer class="footer">
             <div class="container-fluid">

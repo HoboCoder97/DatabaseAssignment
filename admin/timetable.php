@@ -41,9 +41,9 @@ session_start();
         <div class="sidebar-wrapper" id="sidebar-wrapper">
             <ul class="nav">
                 <li >
-                    <a href="consultation.php">
+                    <a href="presentation.php">
                         <i class="now-ui-icons users_single-02"></i>
-                        <p>Consultation</p>
+                        <p>Presentation</p>
                     </a>
                 </li>
                 <li class="active">
@@ -130,37 +130,110 @@ session_start();
         </div>
         <div class="content">
             <div class="row">
-
+                <div class="col-md-3">
+                    <div class="card card-user">
+                        <div class="card card-body">
+                            <h5>Create Lesson</h5>
+                            <form action="addlesson.php" method="post">
+                                <input type="text" placeholder="Venue" name="venue">
+                                <br>
+                                Module
+                                <select name="moduleid" >
+                                    <?php
+                                    include("../includes/db.php");
+                                    $sql = "SELECT * FROM module";
+                                    $res = mysqli_query($con, $sql);
+                                    while ($rows = mysqli_fetch_assoc($res)){
+                                        echo "<option value='{$rows['mod_name']}'> {$rows['mod_name']} </option>";
+                                    }
+                                    ?>
+                                </select>
+                                <br>
+                                Day <select name="day">
+                                    <option value="Monday">Monday</option>
+                                    <option value="Tuesday">Tuesday</option>
+                                    <option value="Wednesday">Wednesday</option>
+                                    <option value="Thursday">Thursday</option>
+                                    <option value="Friday">Friday</option>
+                                </select>
+                                <br>
+                                Time <select name="time">
+                                    <option value= "8:00">8am</option>
+                                    <option value= "10:00">10am</option>
+                                    <option value= "12:00">12pm</option>
+                                    <option value= "14:00">2pm</option>
+                                    <option value= "16:00">4pm</option>
+                                </select>
+                                <br><br>
+                                <?php
+                                echo "<input type='hidden' name='lec' value='{$_POST['id']}' >";
+                                ?>
+                                <input type="submit" value="Create Consultation Slot">
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-9">
                     <div class="card card-user">
                         <div class="card-body">
-
-                            <?php
-                            echo "<table class=\"table\">
+<?php
+$name = $_POST['name'];
+echo "<h5>$name   's Timetable </h5>";
+echo "<table class=\"table\">
                                         <thead>
                                         <tr>
-                                            <th> Name </th>
-                                            <th> ID </th>
-                                            <th> ViewTimetable </th>
+                                            <th> Day </th>
+                                            <th> 8:00am </th>
+                                            <th> 10:00am </th>
+                                            <th> 12:00pm </th>
+                                            <th> 2:00pm </th>
+                                            <th> 4:00pm </th>
                                         </tr>
                                         </thead>
                                         <tbody>";
-                            include ("../includes/db.php");
+                            $days = array("Monday", "Tuesday", "Wednesday", "Thursday", "Friday");
+                            $times = array (strtotime("8:00:00"),strtotime("10:00:00"),strtotime("12:00:00"),strtotime("14:00:00"),
+                            strtotime("16:00:00"));
 
-                            $sql  = "SELECT * FROM lecturer";
-                            // $result = mysqli_real_query($con, $sql);
-                            $result = mysqli_query($con, $sql) or die ("Error in query: $sql ".mysqli_error($con));
-                            $count=0;
+                            for ($day=0; $day<5; $day++) {
+                            echo "<tr><td>{$days[$day]}</td>";
 
-                                while($row = mysqli_fetch_assoc($result)) {
-                                   echo "<tr><form action='timetable.php' method='post'>";
-                                   echo "<td>{$row['lec_name']}</td>";
-                                    echo "<td>{$row['lec_id']}</td>";
-                                    echo "<input type='hidden' value='{$row['lec_id']}' name='id'>";
-                                    echo "<input type='hidden' value='{$row['lec_name']}' name='name'>";
-                                    echo "<td><input type='submit' value='View Timetable'></td>";
-                                   echo "</form></tr>";
+
+                                for ($time = 0; $time < 5; $time++) {
+                                $found = 0;
+                                $sql = "select day, time, venue, l2.lec_name, m.mod_name from lec_schedule
+    inner join lecturer l2 on lec_schedule.lec_id = l2.lec_id
+    inner join module m on lec_schedule.mod_id = m.mod_id
+where l2.lec_name = '$name'
+ORDER BY FIELD(day, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Satuday', 'Sunday'), time";
+
+                                // $result = mysqli_real_query($con, $sql);
+                                $result = mysqli_query($con, $sql) or die ("Error in query: $sql " . mysqli_error($con));
+
+                                while ($row = mysqli_fetch_assoc($result)) {
+                                if ($row['day'] == $days[$day]) {
+
+                                if (strtotime($row['time']) == $times[$time]) {
+                                if ($row['status'] != "open") {
+                                echo "<td>{$row['venue']}</td>";
+                                $found = 1;
                                 }
+                                else {
+                                echo "<td>Open Consultation Slot</td>";
+                                $found=1;
+                                }
+                                }
+
+
+                                }
+                                }
+                                if ($found==0)
+                                echo "<td>EMPTY</td>";
+                                }
+
+
+                                echo "</tr>";
+                            }
 
 
 
@@ -171,6 +244,7 @@ session_start();
                     </div>
                 </div>
             </div>
+
         </div>
         <footer class="footer">
             <div class="container-fluid">

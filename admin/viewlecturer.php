@@ -41,9 +41,9 @@ session_start();
         <div class="sidebar-wrapper" id="sidebar-wrapper">
             <ul class="nav">
                 <li >
-                    <a href="consultation.php">
+                    <a href="presentation.php">
                         <i class="now-ui-icons users_single-02"></i>
-                        <p>Consultation</p>
+                        <p>Presentation</p>
                     </a>
                 </li>
                 <li class="active">
@@ -152,15 +152,15 @@ session_start();
                             $result = mysqli_query($con, $sql) or die ("Error in query: $sql ".mysqli_error($con));
                             $count=0;
 
-                                while($row = mysqli_fetch_assoc($result)) {
-                                   echo "<tr><form action='timetable.php' method='post'>";
-                                   echo "<td>{$row['lec_name']}</td>";
-                                    echo "<td>{$row['lec_id']}</td>";
-                                    echo "<input type='hidden' value='{$row['lec_id']}' name='id'>";
-                                    echo "<input type='hidden' value='{$row['lec_name']}' name='name'>";
-                                    echo "<td><input type='submit' value='View Timetable'></td>";
-                                   echo "</form></tr>";
-                                }
+                            while($row = mysqli_fetch_assoc($result)) {
+                                echo "<tr><form action='timetable.php' method='post'>";
+                                echo "<td>{$row['lec_name']}</td>";
+                                echo "<td>{$row['lec_id']}</td>";
+                                echo "<input type='hidden' value='{$row['lec_id']}' name='id'>";
+                                echo "<input type='hidden' value='{$row['lec_name']}' name='name'>";
+                                echo "<td><input type='submit' value='View Timetable'></td>";
+                                echo "</form></tr>";
+                            }
 
 
 

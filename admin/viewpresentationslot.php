@@ -1,4 +1,6 @@
+
 <?php
+
 session_start();
 ?>
 
@@ -40,13 +42,13 @@ session_start();
         </div>
         <div class="sidebar-wrapper" id="sidebar-wrapper">
             <ul class="nav">
-                <li >
-                    <a href="consultation.php">
+                <li class="active">
+                    <a href="presentation.php">
                         <i class="now-ui-icons users_single-02"></i>
-                        <p>Consultation</p>
+                        <p>Presentation</p>
                     </a>
                 </li>
-                <li class="active">
+                <li>
                     <a href="viewlecturer.php">
                         <i class="now-ui-icons design_app"></i>
                         <p>Timetable</p>
@@ -130,47 +132,57 @@ session_start();
         </div>
         <div class="content">
             <div class="row">
-
                 <div class="col-md-9">
                     <div class="card card-user">
                         <div class="card-body">
+                           <h5> Presentation Slots </h5>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <td>Venue</td>
+                                        <td>Week</td>
+                                        <td>Time</td>
+                                        <td>Lecturer</td>
+                                        <td>Student</td>
+                                        <td>Completed</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                <?php
+                                    include("../includes/db.php");
 
-                            <?php
-                            echo "<table class=\"table\">
-                                        <thead>
-                                        <tr>
-                                            <th> Name </th>
-                                            <th> ID </th>
-                                            <th> ViewTimetable </th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>";
-                            include ("../includes/db.php");
+                                    $sql = "select booking_id, w.week, day, time, venue, l.lec_name, (bt.type_name) as type_name, (s.stud_name) as stud_name, status from booking_schedule
+    inner join lecturer l on booking_schedule.lec_id = l.lec_id
+    inner join booking_type bt on booking_schedule.type_id = bt.type_id
+    inner join student s on booking_schedule.stud_id = s.stud_id
+    inner join week w on booking_schedule.week_id = w.week_id
+where bt.type_id = 1 and status != 'completed'";
 
-                            $sql  = "SELECT * FROM lecturer";
-                            // $result = mysqli_real_query($con, $sql);
-                            $result = mysqli_query($con, $sql) or die ("Error in query: $sql ".mysqli_error($con));
-                            $count=0;
+                                   $result = mysqli_query($con,$sql) or die (mysqli_error($con));
 
-                                while($row = mysqli_fetch_assoc($result)) {
-                                   echo "<tr><form action='timetable.php' method='post'>";
-                                   echo "<td>{$row['lec_name']}</td>";
-                                    echo "<td>{$row['lec_id']}</td>";
-                                    echo "<input type='hidden' value='{$row['lec_id']}' name='id'>";
-                                    echo "<input type='hidden' value='{$row['lec_name']}' name='name'>";
-                                    echo "<td><input type='submit' value='View Timetable'></td>";
-                                   echo "</form></tr>";
-                                }
+                                    while ($row = mysqli_fetch_assoc($result)){
+                                        echo "<tr>";
+                                        echo "<td>{$row['venue']}</td>";
+                                        echo "<td>{$row['week']}</td>";
+                                        echo "<td>{$row['time']}</td>";
+                                        echo "<td>{$row['lec_name']}</td>";
+                                        echo "<td>{$row['stud_name']}</td>";
 
-
-
-                            ?>
-                            </tbody>
+                                        echo "<td><form action='removeslot.php' method='post'>
+                                                    <input type='hidden' value='{$row['booking_id']}' name='id'>
+                                                    <input type='submit' value='Remove Slot'>
+                                                    </form></td>";
+                                        echo "</tr>";
+                                    }
+                                ?>
+                                </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+
             </div>
+
         </div>
         <footer class="footer">
             <div class="container-fluid">

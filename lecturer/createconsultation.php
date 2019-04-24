@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 ?>
 
@@ -40,14 +41,14 @@ session_start();
         </div>
         <div class="sidebar-wrapper" id="sidebar-wrapper">
             <ul class="nav">
-                <li >
+                <li class="active">
                     <a href="consultation.php">
                         <i class="now-ui-icons users_single-02"></i>
                         <p>Consultation</p>
                     </a>
                 </li>
-                <li class="active">
-                    <a href="viewlecturer.php">
+                <li>
+                    <a href="viewtimetable.php">
                         <i class="now-ui-icons design_app"></i>
                         <p>Timetable</p>
                     </a>
@@ -130,47 +131,43 @@ session_start();
         </div>
         <div class="content">
             <div class="row">
-
+                <div class="col-md-3">
+                    <div class="card card-user">
+                        <div class="card-body">
+                            <a href="consultation.php">Back</a>
+                        </div>
+                    </div>
+                </div>
                 <div class="col-md-9">
                     <div class="card card-user">
                         <div class="card-body">
-
-                            <?php
-                            echo "<table class=\"table\">
-                                        <thead>
-                                        <tr>
-                                            <th> Name </th>
-                                            <th> ID </th>
-                                            <th> ViewTimetable </th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>";
-                            include ("../includes/db.php");
-
-                            $sql  = "SELECT * FROM lecturer";
-                            // $result = mysqli_real_query($con, $sql);
-                            $result = mysqli_query($con, $sql) or die ("Error in query: $sql ".mysqli_error($con));
-                            $count=0;
-
-                                while($row = mysqli_fetch_assoc($result)) {
-                                   echo "<tr><form action='timetable.php' method='post'>";
-                                   echo "<td>{$row['lec_name']}</td>";
-                                    echo "<td>{$row['lec_id']}</td>";
-                                    echo "<input type='hidden' value='{$row['lec_id']}' name='id'>";
-                                    echo "<input type='hidden' value='{$row['lec_name']}' name='name'>";
-                                    echo "<td><input type='submit' value='View Timetable'></td>";
-                                   echo "</form></tr>";
-                                }
-
-
-
-                            ?>
-                            </tbody>
-                            </table>
+<h5>Create Consultation Slot</h5>
+                           <form action="addconsultation.php" method="post">
+                            Week <input type="number" name="week" value="1">
+                               <br>
+                            Day <select name="day">
+                                   <option value="Monday">Monday</option>
+                                   <option value="Tuesday">Tuesday</option>
+                                   <option value="Wednesday">Wednesday</option>
+                                   <option value="Thursday">Thursday</option>
+                                   <option value="Friday">Friday</option>
+                               </select>
+                            <br>
+                               Time <select name="time">
+                                   <option value= "8:00">8am</option>
+                                   <option value= "10:00">10am</option>
+                                   <option value= "12:00">12pm</option>
+                                   <option value= "14:00">2pm</option>
+                                   <option value= "16:00">4pm</option>
+                               </select>
+                               <br><br>
+                           <input type="submit" value="Create Consultation Slot">
+                           </form>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
         <footer class="footer">
             <div class="container-fluid">

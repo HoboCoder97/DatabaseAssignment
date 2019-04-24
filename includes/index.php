@@ -18,8 +18,8 @@ and stud_password='$password'";
     $row = mysqli_fetch_array($result);
     if ($rows == 1) {
         session_start();
-        $_SESSION['id']=$row['stud_id'];
-
+        $_SESSION["id"]=$row['stud_id'];
+        $_SESSION["name"]=$row['stud_name'];
         // Redirect user to dashboard.html
         header("Location: ../student/viewlecturer.php");
     }
@@ -32,21 +32,24 @@ and lec_password='$password'";
 
         if ($rows == 1){
             $type = "LECTURER";
-            $_SESSION['id']=$row['lec_id'];
+            session_start();
+            $_SESSION["id"]=$row['lec_id'];
+            $_SESSION["name"]=$row['lec_name'];
             // Redirect user to dashboard.html
             header("Location: ../lecturer/viewtimetable.php");
         }
         else {
             $query = "SELECT * FROM `admin` WHERE admin_name='$username'
-and admin_passsword='$password'";
+and admin_password='$password'";
             $result = mysqli_query($con, $query) or die(mysqli_error($con));
             $rows = mysqli_num_rows($result);
             $row = mysqli_fetch_array($result);
             if ($rows == 1){
                 $type = "ADMIN";
+                session_start();
                 $_SESSION['id']=$row['admin_id'];
                 // Redirect user to dashboard.html
-                header("Location: ../admin/viewlecturerlist.php");
+                header("Location: ../admin/viewlecturer.php");
             }
             else
             {
